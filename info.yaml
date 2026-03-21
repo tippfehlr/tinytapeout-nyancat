@@ -1,11 +1,11 @@
 # Tiny Tapeout project information
 project:
-  title:        "Morse Code"
+  title:        "Nyan Cat + Morse Code"
   author:       "tippfehlr"
   discord:      "tippfehlr"
-  description:  "Outputs Morse code for 'HELLO WORLD' on all output pins at ~20 WPM. Written with GitHub Copilot"
+  description:  "Plays Nyan Cat lead melody as PWM square wave on uo[0] (piezo speaker). Outputs Morse code 'HELLO WORLD' on uo[7:1] and uio[7:0]. Clock: 25 MHz. Written with GitHub Copilot"
   language:     "Verilog"
-  clock_hz:     16
+  clock_hz:     25000000
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
   tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
@@ -33,7 +33,7 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: "Morse code output"
+  uo[0]: "Piezo speaker PWM (Nyan Cat lead melody)"
   uo[1]: "Morse code output"
   uo[2]: "Morse code output"
   uo[3]: "Morse code output"

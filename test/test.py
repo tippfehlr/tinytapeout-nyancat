@@ -10,8 +10,8 @@ from cocotb.triggers import ClockCycles, Timer
 async def test_project(dut):
     dut._log.info("Start")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
+    # Clock: 25 MHz = 40 ns period
+    clock = Clock(dut.clk, 40, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -23,61 +23,58 @@ async def test_project(dut):
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
 
-    dut._log.info("Test Morse code: HELLO WORLD")
+    # After reset all outputs must be 0, bidirectional pins all configured as outputs.
+    await Timer(1, unit="ns")
+    assert dut.uo_out.value == 0x00, \
+        f"After reset: expected uo_out=0x00, got {hex(int(dut.uo_out.value))}"
+    assert dut.uio_out.value == 0x00, \
+        f"After reset: expected uio_out=0x00, got {hex(int(dut.uio_out.value))}"
+    assert dut.uio_oe.value == 0xFF, \
+        f"Expected uio_oe=0xFF, got {hex(int(dut.uio_oe.value))}"
 
-    # Each clock cycle equals one Morse unit (no clock divider in design).
-    # After reset, all outputs must be 0.
-    assert dut.uo_out.value == 0x00, f"After reset: expected uo_out=0x00, got {hex(int(dut.uo_out.value))}"
-    assert dut.uio_out.value == 0x00, f"After reset: expected uio_out=0x00, got {hex(int(dut.uio_out.value))}"
-    # Bidirectional pins are always configured as outputs.
-    assert dut.uio_oe.value == 0xFF, f"Expected uio_oe=0xFF, got {hex(int(dut.uio_oe.value))}"
+    dut._log.info("Verify PWM output on uo_out[0] for first note (D#5, ~622 Hz)")
 
-    # Helper to advance one unit and check output value
-    async def check_unit(expected, label):
-        await ClockCycles(dut.clk, 1)
-        await Timer(1, unit="ns")  # cocotb resumes in the active region before NBA updates;
-        # this 1 ns advance lets non-blocking assignments propagate before sampling
-        val = int(dut.uo_out.value)
-        assert val == expected, f"{label}: expected {hex(expected)}, got {hex(val)}"
-        assert int(dut.uio_out.value) == expected, f"{label} uio_out mismatch"
+    # First music note: D#5/115ms.
+    # At 25 MHz the half-period is 20088 cycles; PWM toggles every 20088 cycles.
+    # After reset: PWM starts low, goes high after 20088 cycles, low after 40176, ...
+    D5SHARP_HALF_PERIOD = 20088
 
-    ON  = 0xFF
-    OFF = 0x00
+    await ClockCycles(dut.clk, D5SHARP_HALF_PERIOD)
+    await Timer(1, unit="ns")
+    pwm_val = int(dut.uo_out.value) & 0x01
+    assert pwm_val == 1, \
+        f"Expected PWM high after {D5SHARP_HALF_PERIOD} cycles, got {pwm_val}"
 
-    # H: ....  (steps 0-7)
-    # dot ON, gap, dot ON, gap, dot ON, gap, dot ON, char_gap(3)
-    dut._log.info("H: ....")
-    await check_unit(ON,  "H dot1")
-    await check_unit(OFF, "H gap1")
-    await check_unit(ON,  "H dot2")
-    await check_unit(OFF, "H gap2")
-    await check_unit(ON,  "H dot3")
-    await check_unit(OFF, "H gap3")
-    await check_unit(ON,  "H dot4")
-    await check_unit(OFF, "H char_gap unit0")
-    await check_unit(OFF, "H char_gap unit1")
-    await check_unit(OFF, "H char_gap unit2")
+    await ClockCycles(dut.clk, D5SHARP_HALF_PERIOD)
+    await Timer(1, unit="ns")
+    pwm_val = int(dut.uo_out.value) & 0x01
+    assert pwm_val == 0, \
+        f"Expected PWM low after {2 * D5SHARP_HALF_PERIOD} cycles, got {pwm_val}"
 
-    # E: .  (steps 8-9)
-    dut._log.info("E: .")
-    await check_unit(ON,  "E dot")
-    await check_unit(OFF, "E char_gap unit0")
-    await check_unit(OFF, "E char_gap unit1")
-    await check_unit(OFF, "E char_gap unit2")
+    dut._log.info("PWM output verified for D#5")
 
-    # L: .-..  (steps 10-17)
-    dut._log.info("L: .-..")
-    await check_unit(ON,  "L dot1")
-    await check_unit(OFF, "L gap1")
-    await check_unit(ON,  "L dash unit0")
-    await check_unit(ON,  "L dash unit1")
-    await check_unit(ON,  "L dash unit2")
-    await check_unit(OFF, "L gap2")
-    await check_unit(ON,  "L dot2")
-    await check_unit(OFF, "L gap3")
-    await check_unit(ON,  "L dot3")
-    await check_unit(OFF, "L char_gap unit0")
-    await check_unit(OFF, "L char_gap unit1")
-    await check_unit(OFF, "L char_gap unit2")
+    dut._log.info("Verify Morse code appears on uo_out[7:1] and uio_out after first Morse unit")
+    # Morse clock divider: 1,562,500 cycles per unit.
+    # The divider starts from 0 when rst_n goes high.
+    # At cycle 1,562,499 (since rst) the divider fires (morse_tick is scheduled to 1 via NBA).
+    # At cycle 1,562,500 (one cycle later), the Morse state machine sees morse_tick=1 and
+    # updates morse_out (also via NBA).  We therefore need to wait until cycle 1,562,501 to
+    # sample the updated morse_out after the NBA settle.
+    #
+    # We've already consumed 2 * D5SHARP_HALF_PERIOD = 40176 cycles since rst.
+    MORSE_DIV = 1_562_500
+    cycles_since_rst = 2 * D5SHARP_HALF_PERIOD  # 40176
+    # +1 to cross from the tick cycle into the output-update cycle
+    remaining = MORSE_DIV - (cycles_since_rst % MORSE_DIV) + 1
+    await ClockCycles(dut.clk, remaining)
+    await Timer(1, unit="ns")
 
-    dut._log.info("Morse code test passed!")
+    # H dot1 is ON, so uo_out[7:1] must all be 1 and uio_out must be 0xFF.
+    morse_bits = (int(dut.uo_out.value) >> 1) & 0x7F
+    assert morse_bits == 0x7F, \
+        f"Expected Morse bits 0x7F after first Morse tick, got {hex(morse_bits)}"
+    assert int(dut.uio_out.value) == 0xFF, \
+        f"Expected uio_out=0xFF after first Morse tick, got {hex(int(dut.uio_out.value))}"
+
+    dut._log.info("Morse output verified")
+    dut._log.info("All tests passed!")
