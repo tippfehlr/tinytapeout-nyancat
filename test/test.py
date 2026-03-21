@@ -25,7 +25,7 @@ async def test_project(dut):
 
     dut._log.info("Test Morse code: HELLO WORLD")
 
-    # In SIM mode CLKS_PER_UNIT=1, so each clock cycle equals one Morse unit.
+    # Each clock cycle equals one Morse unit (no clock divider in design).
     # After reset, all outputs must be 0.
     assert dut.uo_out.value == 0x00, f"After reset: expected uo_out=0x00, got {hex(int(dut.uo_out.value))}"
     assert dut.uio_out.value == 0x00, f"After reset: expected uio_out=0x00, got {hex(int(dut.uio_out.value))}"

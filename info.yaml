@@ -3,9 +3,9 @@ project:
   title:        "Morse Code HELLO WORLD"      # Project title
   author:       ""      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Outputs Morse code for 'HELLO WORLD' on all output pins at 20 WPM (10 MHz clock)"      # One line description of what your project does
+  description:  "Outputs Morse code for 'HELLO WORLD' on all output pins at ~20 WPM (~16 Hz clock)"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     10000000       # Clock frequency in Hz (or 0 if not applicable)
+  clock_hz:     16       # Clock frequency in Hz: ~16 Hz gives ~20 WPM (1 clock cycle = 1 Morse unit ≈ 62.5 ms)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
   tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
