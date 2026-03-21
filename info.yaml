@@ -1,9 +1,9 @@
 # Tiny Tapeout project information
 project:
-  title:        "Nyan Cat + Morse Code"
+  title:        "Nyan Cat"
   author:       "tippfehlr"
   discord:      "tippfehlr"
-  description:  "Plays Nyan Cat lead melody as PWM square wave on uo[0] (piezo speaker). Outputs Morse code 'HELLO WORLD' on uo[7:1] and uio[7:0]. Clock: 25 MHz. Written with GitHub Copilot"
+  description:  "Plays Nyan Cat lead melody as PWM square wave on uo[0] and harmony on uo[1] (piezo speakers). Clock: 25 MHz. Written with GitHub Copilot"
   language:     "Verilog"
   clock_hz:     25000000
 
@@ -33,24 +33,24 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: "Piezo speaker PWM (Nyan Cat lead melody)"
-  uo[1]: "Morse code output"
-  uo[2]: "Morse code output"
-  uo[3]: "Morse code output"
-  uo[4]: "Morse code output"
-  uo[5]: "Morse code output"
-  uo[6]: "Morse code output"
-  uo[7]: "Morse code output"
+  uo[0]: "Lead melody PWM (first piezo speaker)"
+  uo[1]: "Harmony PWM (second piezo speaker)"
+  uo[2]: ""
+  uo[3]: ""
+  uo[4]: ""
+  uo[5]: ""
+  uo[6]: ""
+  uo[7]: ""
 
   # Bidirectional pins
-  uio[0]: "Morse code output"
-  uio[1]: "Morse code output"
-  uio[2]: "Morse code output"
-  uio[3]: "Morse code output"
-  uio[4]: "Morse code output"
-  uio[5]: "Morse code output"
-  uio[6]: "Morse code output"
-  uio[7]: "Morse code output"
+  uio[0]: ""
+  uio[1]: ""
+  uio[2]: ""
+  uio[3]: ""
+  uio[4]: ""
+  uio[5]: ""
+  uio[6]: ""
+  uio[7]: ""
 
 # Do not change!
 yaml_version: 6
