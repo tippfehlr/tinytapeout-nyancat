@@ -1,11 +1,11 @@
 # Tiny Tapeout project information
 project:
-  title:        "Morse Code HELLO WORLD"      # Project title
-  author:       ""      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  "Outputs Morse code for 'HELLO WORLD' on all output pins at ~20 WPM (~16 Hz clock)"      # One line description of what your project does
-  language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     16       # Clock frequency in Hz: ~16 Hz gives ~20 WPM (1 clock cycle = 1 Morse unit ≈ 62.5 ms)
+  title:        "Morse Code"
+  author:       "tippfehlr"
+  discord:      "tippfehlr"
+  description:  "Outputs Morse code for 'HELLO WORLD' on all output pins at ~20 WPM. Written with GitHub Copilot"
+  language:     "Verilog"
+  clock_hz:     16
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
   tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
@@ -33,24 +33,24 @@ pinout:
   ui[7]: ""
 
   # Outputs
-  uo[0]: "Morse code output bit 0"
-  uo[1]: "Morse code output bit 1"
-  uo[2]: "Morse code output bit 2"
-  uo[3]: "Morse code output bit 3"
-  uo[4]: "Morse code output bit 4"
-  uo[5]: "Morse code output bit 5"
-  uo[6]: "Morse code output bit 6"
-  uo[7]: "Morse code output bit 7"
+  uo[0]: "Morse code output"
+  uo[1]: "Morse code output"
+  uo[2]: "Morse code output"
+  uo[3]: "Morse code output"
+  uo[4]: "Morse code output"
+  uo[5]: "Morse code output"
+  uo[6]: "Morse code output"
+  uo[7]: "Morse code output"
 
   # Bidirectional pins
-  uio[0]: "Morse code output bit 0"
-  uio[1]: "Morse code output bit 1"
-  uio[2]: "Morse code output bit 2"
-  uio[3]: "Morse code output bit 3"
-  uio[4]: "Morse code output bit 4"
-  uio[5]: "Morse code output bit 5"
-  uio[6]: "Morse code output bit 6"
-  uio[7]: "Morse code output bit 7"
+  uio[0]: "Morse code output"
+  uio[1]: "Morse code output"
+  uio[2]: "Morse code output"
+  uio[3]: "Morse code output"
+  uio[4]: "Morse code output"
+  uio[5]: "Morse code output"
+  uio[6]: "Morse code output"
+  uio[7]: "Morse code output"
 
 # Do not change!
 yaml_version: 6
