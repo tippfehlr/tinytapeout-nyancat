@@ -32,6 +32,17 @@ make -B FST=
 
 This will generate `tb.vcd` instead of `tb.fst`.
 
+## How to listen to the music
+
+Run the audio renderer to generate a WAV file from the ROM data (no hardware or simulator needed):
+
+```sh
+python3 render_audio.py
+# → nyan_cat.wav  (~34.6 s, one full loop)
+```
+
+Open `nyan_cat.wav` in any media player to hear the lead melody and harmony as they will sound on the chip.
+
 ## How to view the waveform file
 
 Using GTKWave
