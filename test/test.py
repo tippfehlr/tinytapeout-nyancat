@@ -8,10 +8,10 @@ from cocotb.triggers import ClockCycles, Timer
 
 @cocotb.test()
 async def test_project(dut):
-    dut._log.info("Start")
+    dut._log.info("Start Nyan Cat test")
 
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, unit="us")
+    # 10 MHz clock (100 ns period), matching design expectation
+    clock = Clock(dut.clk, 100, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
@@ -22,62 +22,36 @@ async def test_project(dut):
     dut.rst_n.value = 0
     await ClockCycles(dut.clk, 10)
     dut.rst_n.value = 1
+    await Timer(1, unit="ns")
 
-    dut._log.info("Test Morse code: HELLO WORLD")
+    # After reset: both piezo outputs must be silent, IOs configured as outputs
+    assert dut.uo_out.value == 0x00, \
+        f"After reset: expected uo_out=0x00, got {hex(int(dut.uo_out.value))}"
+    assert dut.uio_out.value == 0x00, \
+        f"After reset: expected uio_out=0x00, got {hex(int(dut.uio_out.value))}"
+    assert dut.uio_oe.value == 0xFF, \
+        f"Expected uio_oe=0xFF, got {hex(int(dut.uio_oe.value))}"
 
-    # Each clock cycle equals one Morse unit (no clock divider in design).
-    # After reset, all outputs must be 0.
-    assert dut.uo_out.value == 0x00, f"After reset: expected uo_out=0x00, got {hex(int(dut.uo_out.value))}"
-    assert dut.uio_out.value == 0x00, f"After reset: expected uio_out=0x00, got {hex(int(dut.uio_out.value))}"
-    # Bidirectional pins are always configured as outputs.
-    assert dut.uio_oe.value == 0xFF, f"Expected uio_oe=0xFF, got {hex(int(dut.uio_oe.value))}"
+    dut._log.info("Advancing to first unit tick (600,001 cycles)...")
+    # After 600,001 cycles the sequencer loads the first intro note (D#6 on lead).
+    # Harmony stays silent (intro silence period).
+    await ClockCycles(dut.clk, 600_001)
+    await Timer(1, unit="ns")
 
-    # Helper to advance one unit and check output value
-    async def check_unit(expected, label):
-        await ClockCycles(dut.clk, 1)
-        await Timer(1, unit="ns")  # cocotb resumes in the active region before NBA updates;
-        # this 1 ns advance lets non-blocking assignments propagate before sampling
-        val = int(dut.uo_out.value)
-        assert val == expected, f"{label}: expected {hex(expected)}, got {hex(val)}"
-        assert int(dut.uio_out.value) == expected, f"{label} uio_out mismatch"
+    harm_out = (int(dut.uo_out.value) >> 1) & 0x01
+    assert harm_out == 0, f"Harmony should be silent during intro, got harm_out={harm_out}"
+    assert dut.uio_out.value == 0x00, "uio_out changed unexpectedly"
+    assert dut.uio_oe.value == 0xFF, "uio_oe changed unexpectedly"
 
-    ON  = 0xFF
-    OFF = 0x00
+    dut._log.info("Checking lead tone toggles (D#6 half-period = 4018 cycles)...")
+    # One cycle later the tone generator fires its first toggle (lead_note is now D#6).
+    # Advance 2 cycles to land well within the first half-period and confirm the output
+    # has gone from 0 to 1.
+    lead_out_before = int(dut.uo_out.value) & 0x01
+    await ClockCycles(dut.clk, 2)
+    await Timer(1, unit="ns")
+    lead_out_after = int(dut.uo_out.value) & 0x01
+    assert lead_out_after != lead_out_before, \
+        f"Lead tone should have toggled: before={lead_out_before}, after={lead_out_after}"
 
-    # H: ....  (steps 0-7)
-    # dot ON, gap, dot ON, gap, dot ON, gap, dot ON, char_gap(3)
-    dut._log.info("H: ....")
-    await check_unit(ON,  "H dot1")
-    await check_unit(OFF, "H gap1")
-    await check_unit(ON,  "H dot2")
-    await check_unit(OFF, "H gap2")
-    await check_unit(ON,  "H dot3")
-    await check_unit(OFF, "H gap3")
-    await check_unit(ON,  "H dot4")
-    await check_unit(OFF, "H char_gap unit0")
-    await check_unit(OFF, "H char_gap unit1")
-    await check_unit(OFF, "H char_gap unit2")
-
-    # E: .  (steps 8-9)
-    dut._log.info("E: .")
-    await check_unit(ON,  "E dot")
-    await check_unit(OFF, "E char_gap unit0")
-    await check_unit(OFF, "E char_gap unit1")
-    await check_unit(OFF, "E char_gap unit2")
-
-    # L: .-..  (steps 10-17)
-    dut._log.info("L: .-..")
-    await check_unit(ON,  "L dot1")
-    await check_unit(OFF, "L gap1")
-    await check_unit(ON,  "L dash unit0")
-    await check_unit(ON,  "L dash unit1")
-    await check_unit(ON,  "L dash unit2")
-    await check_unit(OFF, "L gap2")
-    await check_unit(ON,  "L dot2")
-    await check_unit(OFF, "L gap3")
-    await check_unit(ON,  "L dot3")
-    await check_unit(OFF, "L char_gap unit0")
-    await check_unit(OFF, "L char_gap unit1")
-    await check_unit(OFF, "L char_gap unit2")
-
-    dut._log.info("Morse code test passed!")
+    dut._log.info("Nyan Cat test passed!")
