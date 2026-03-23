@@ -11,7 +11,7 @@
 // uo_out[0] = lead melody piezo
 // uo_out[1] = harmony piezo
 // Structure: intro (2 bars) → theme (4 bars×2) → verse (4 bars×2) → repeat from theme
-module tt_um_example (
+module tt_um_tippfehlr_nyan_cat (
     input  wire [7:0] ui_in,    // Dedicated inputs
     output wire [7:0] uo_out,   // Dedicated outputs
     input  wire [7:0] uio_in,   // IOs: Input path

@@ -1,17 +1,17 @@
 # Tiny Tapeout project information
 project:
-  title:        "Morse Code"
+  title:        "NYAN CAT"
   author:       "tippfehlr"
   discord:      "tippfehlr"
-  description:  "Outputs Morse code for 'HELLO WORLD' on all output pins at ~20 WPM. Written with GitHub Copilot"
+  description:  "Plays the NYAN CAT theme, hopefully. Written by GitHub Copilot, probably GPT-5.3-Codex"
   language:     "Verilog"
-  clock_hz:     16
+  clock_hz:     10_000_000
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
-  tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
+  tiles: "1x2"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
 
   # Your top module name must start with "tt_um_". Make it unique by including your github username:
-  top_module:  "tt_um_example"
+  top_module:  "tt_um_tippfehlr_nyan_cat"
 
   # List your project's source files here.
   # Source files must be in ./src and you must list each source file separately, one per line.
@@ -35,12 +35,12 @@ pinout:
   # Outputs
   uo[0]: "Morse code output"
   uo[1]: "Morse code output"
-  uo[2]: "Morse code output"
-  uo[3]: "Morse code output"
-  uo[4]: "Morse code output"
-  uo[5]: "Morse code output"
-  uo[6]: "Morse code output"
-  uo[7]: "Morse code output"
+  uo[2]: ""
+  uo[3]: ""
+  uo[4]: ""
+  uo[5]: ""
+  uo[6]: ""
+  uo[7]: ""
 
   # Bidirectional pins
   uio[0]: "Morse code output"
